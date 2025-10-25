@@ -32,9 +32,7 @@ app.get('/', (req, res) => {
 app.use('/api/v1', userRouter);
 app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/staff', staffRouter);
-
-// Optional: Auth routes (uncomment when ready)
-// app.use('/api/v1/auth', require('./routes/authRoutes.js'));
+app.use('/api/v1/auth', require('./routes/authRoute.js'));
 
 // Start server
 app.listen(3000, () => {
