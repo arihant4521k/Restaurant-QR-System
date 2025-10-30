@@ -1,40 +1,49 @@
 const express = require('express');
-const app = express();
 const mongoose = require('mongoose');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const authRoutes = require('./routes/auth.routes');
+const menuRoutes = require('./routes/menu.routes');
+const orderRoutes = require('./routes/order.routes');
+const tableRoutes = require('./routes/table.routes');
+const fs = require('fs');
+const uploadsDir = './uploads';
 
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+dotenv.config();
+
+const app = express();
+
+// Middleware
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static('uploads'));
 
-// Import all routers
-const userRouter = require('./routes/userRoutes.js');
-const adminRouter = require('./routes/adminRoutes.js');
-const staffRouter = require('./routes/staffRoutes.js');
+// MongoDB Connection (FIXED - removed deprecated options)
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log('MongoDB Error:', err));
 
-// Database connection
-const connectDb = async () => {
-  try {
-    const connection = await mongoose.connect(
-      'mongodb://localhost:27017/RestaurentDB'
-    );
-    console.log('DB CONNECTED 🔥');
-  } catch (error) {
-    console.log(error);
-  }
-};
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/menu', menuRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/tables', tableRoutes);
 
-connectDb();
-
-// Home route
-app.get('/', (req, res) => {
-  res.send("Restaurant Management System - Home Page");
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error'
+  });
 });
 
-// API Routes
-app.use('/api/v1', userRouter);
-app.use('/api/v1/admin', adminRouter);
-app.use('/api/v1/staff', staffRouter);
-app.use('/api/v1/auth', require('./routes/authRoute.js'));
-
-// Start server
-app.listen(3000, () => {
-  console.log('Server is running on port 3000 🚀');
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
