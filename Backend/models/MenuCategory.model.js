@@ -1,11 +1,9 @@
-// Backend/models/menuCategory.js
 const mongoose = require('mongoose');
 
 const menuCategorySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
     trim: true
   },
   displayOrder: {
@@ -19,17 +17,9 @@ const menuCategorySchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
   }
-});
+}, { timestamps: true });
 
-// Update updatedAt on save
-menuCategorySchema.pre('save', function (next) {
-  this.updatedAt = Date.now();
-  next();
-});
+menuCategorySchema.index({ displayOrder: 1 });
 
 module.exports = mongoose.model('MenuCategory', menuCategorySchema);

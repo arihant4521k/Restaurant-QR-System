@@ -1,4 +1,3 @@
-// Backend/models/menuItem.js
 const mongoose = require('mongoose');
 
 const menuItemSchema = new mongoose.Schema({
@@ -9,7 +8,7 @@ const menuItemSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    default: ''
+    trim: true
   },
   price: {
     type: Number,
@@ -29,27 +28,22 @@ const menuItemSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  tags: {
-    type: [String],
-    default: []
+  tags: [{
+    type: String,
+    trim: true
+  }],
+  popularity: {
+    type: Number,
+    default: 0
   },
   createdAt: {
     type: Date,
     default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
   }
-});
+}, { timestamps: true });
 
-// Update updatedAt on save
-menuItemSchema.pre('save', function (next) {
-  this.updatedAt = Date.now();
-  next();
-});
-
-// Index for search optimization
+menuItemSchema.index({ categoryId: 1, name: 1 });
 menuItemSchema.index({ name: 'text', tags: 'text' });
+menuItemSchema.index({ availability: 1 });
 
 module.exports = mongoose.model('MenuItem', menuItemSchema);
